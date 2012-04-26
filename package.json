@@ -1,0 +1,28 @@
+{
+  "author": "Tom Wilson <tom@jackhq.com>",
+  "name": "cloudq",
+  "description": "http message queue server",
+  "version": "0.5.0",
+  "homepage": "http://cloudq.org",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "apprentice": "~0.2.4",
+    "linchpin": "~0.2.0",
+    "resourceful": "~0.1.10",
+    "request": "*",
+    "nconf": "*",
+    "nano": "*"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "coffee-script": "*",
+    "should": "*"
+  },
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
