@@ -1,10 +1,17 @@
-var Message, pin, resourceful;
+var Message, nconf, pin, resourceful;
 
 resourceful = require('resourceful');
 
+nconf = require('nconf');
+
 pin = require('linchpin');
 
+nconf.env().file({
+  file: "" + __dirname + "/../config.json"
+});
+
 module.exports = Message = resourceful.define('message', function() {
+  this.use('couchdb', nconf.get("couchdb"));
   this.string('queue');
   this.string('body');
   this.string('expire');

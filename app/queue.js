@@ -1,10 +1,17 @@
-var Queue, pin, resourceful;
+var Queue, nconf, pin, resourceful;
 
 resourceful = require('resourceful');
 
+nconf = require('nconf');
+
 pin = require('linchpin');
 
+nconf.env().file({
+  file: "" + __dirname + "/../config.json"
+});
+
 module.exports = Queue = resourceful.define('queue', function() {
+  this.use('couchdb', nconf.get("couchdb"));
   this.string('name');
   this.number('queued');
   this.number('dequeued');

@@ -1,8 +1,11 @@
 resourceful = require 'resourceful'
-#nano = require 'nano'
+nconf = require 'nconf'
 pin = require 'linchpin'
 
+nconf.env().file file: "#{__dirname}/../config.json"
+
 module.exports = Message = resourceful.define 'message', ->
+  @use 'couchdb', nconf.get "couchdb"
   @string 'queue'
   @string 'body'
   @string 'expire'
