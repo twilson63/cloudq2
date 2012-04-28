@@ -39,27 +39,40 @@ Message.queues = function(cb) {
   });
 };
 
-Message.build = function(data, cb) {
+Message.build = function(queue, data, cb) {
+  data.queue = queue;
   data.status = 'queued';
   return Message.create(data, cb);
 };
 
 Message.dequeue = function(queue, cb) {
   return Message.find({
-    queue: queue
+    queue: queue,
+    status: 'queued'
   }, function(err, messages) {
+    if (messages.length === 0) return cb(new Error('empty'), null);
+    messages[0].status = 'dequeued';
     return messages[0].update({
       status: 'dequeued'
-    }, cb);
+    }, function(err, result) {
+      return cb(null, messages[0]);
+    });
   });
 };
 
 Message.complete = function(queue, id, cb) {
   return Message.get(id, function(err, message) {
+    message.status = 'completed';
     return message.update({
       status: 'completed'
-    }, cb);
+    }, function(err, result) {
+      return cb(null, message);
+    });
   });
+};
+
+Message.remove = function(queue, id, cb) {
+  return Message.destroy(id, cb);
 };
 
 pin.on('cloudq.insert', function(data) {

@@ -22,17 +22,25 @@ Message.queues = (cb) ->
     console.log results
     cb null, results
 
-Message.build = (data, cb) ->
+Message.build = (queue, data, cb) ->
+  data.queue = queue
   data.status = 'queued'
   Message.create data, cb
 
 Message.dequeue = (queue, cb) ->
-  Message.find {queue}, (err, messages) ->
-    messages[0].update status: 'dequeued', cb
+  Message.find {queue: queue, status: 'queued'}, (err, messages) ->
+    return cb(new Error('empty'), null) if messages.length == 0
+    messages[0].status = 'dequeued'
+    messages[0].update status: 'dequeued', (err, result) -> 
+      cb null, messages[0]
 
 Message.complete = (queue, id, cb) ->
   Message.get id, (err, message) ->
-    message.update status: 'completed', cb
+    message.status = 'completed'
+    message.update status: 'completed', (err, result) -> 
+      cb null, message
+
+Message.remove = (queue, id, cb) -> Message.destroy id, cb
 
 pin.on 'cloudq.insert', (data) -> 
   Message.create data, (err, message) ->

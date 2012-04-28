@@ -12,23 +12,29 @@ module.exports = Queue = resourceful.define 'queue', ->
   @number 'completed'
   @timestamps()
 
-Queue.add = (message) ->
+Queue.add = (message, cb) ->
   Queue.get message.queue, (err, queue) ->
     if queue?
       queue.update queued: queue.queued + 1, (err, queue) ->
-        pin.emit 'LOG-INFO', { type: 'INFO', msg: 'added item to queue', msg: queue }
+        pin.emit 'LOG', { type: 'INFO', msg: 'added item to queue', msg: queue }
+        cb(err, queue)
     else
       Queue.create _id: message.queue, queued: 1, dequeued: 0, completed: 0, (err, queue) ->
-        pin.emit 'LOG-INFO', { type: 'INFO', msg: 'created queue', data: queue }
+        pin.emit 'LOG', { type: 'INFO', msg: 'created queue', data: queue }
+        cb(err, queue)
 
-Queue.dequeue = (message) ->
-  Queue.get message.queue, (err, queue) ->
-    if queue?
-      queue.update queued: queue.queued - 1, dequeued: queue.dequeued + 1, (err, queue) ->
-        pin.emit 'LOG-INFO', { type: 'INFO', msg: 'dequeued item', data: queue }
+Queue.dequeue = (name, cb) ->
+  Queue.get name, (err, queue) ->
+    if err?
+      cb(err, queue)
+    else
+      queue.update queued: queue.queued - 1, dequeued: queue.dequeued + 1, (err, result) ->
+        pin.emit 'LOG', { type: 'INFO', msg: 'dequeued item', data: queue }
+        cb(err, queue)
 
-Queue.complete = (message) ->
+Queue.complete = (message, cb) ->
   Queue.get message.queue, (err, queue) ->
     if queue?
       queue.update dequeued: queue.queued - 1, completed: queue.completed + 1, (err, queue) ->
-        pin.emit 'LOG-INFO', { type: 'INFO', msg: 'dequeued item', data: queue }
+        pin.emit 'LOG', { type: 'INFO', msg: 'dequeued item', data: queue }
+        cb(err, queue)

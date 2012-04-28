@@ -19,17 +19,18 @@ module.exports = Queue = resourceful.define('queue', function() {
   return this.timestamps();
 });
 
-Queue.add = function(message) {
+Queue.add = function(message, cb) {
   return Queue.get(message.queue, function(err, queue) {
     if (queue != null) {
       return queue.update({
         queued: queue.queued + 1
       }, function(err, queue) {
-        return pin.emit('LOG-INFO', {
+        pin.emit('LOG', {
           type: 'INFO',
           msg: 'added item to queue',
           msg: queue
         });
+        return cb(err, queue);
       });
     } else {
       return Queue.create({
@@ -38,45 +39,50 @@ Queue.add = function(message) {
         dequeued: 0,
         completed: 0
       }, function(err, queue) {
-        return pin.emit('LOG-INFO', {
+        pin.emit('LOG', {
           type: 'INFO',
           msg: 'created queue',
           data: queue
         });
+        return cb(err, queue);
       });
     }
   });
 };
 
-Queue.dequeue = function(message) {
-  return Queue.get(message.queue, function(err, queue) {
-    if (queue != null) {
+Queue.dequeue = function(name, cb) {
+  return Queue.get(name, function(err, queue) {
+    if (err != null) {
+      return cb(err, queue);
+    } else {
       return queue.update({
         queued: queue.queued - 1,
         dequeued: queue.dequeued + 1
-      }, function(err, queue) {
-        return pin.emit('LOG-INFO', {
+      }, function(err, result) {
+        pin.emit('LOG', {
           type: 'INFO',
           msg: 'dequeued item',
           data: queue
         });
+        return cb(err, queue);
       });
     }
   });
 };
 
-Queue.complete = function(message) {
+Queue.complete = function(message, cb) {
   return Queue.get(message.queue, function(err, queue) {
     if (queue != null) {
       return queue.update({
         dequeued: queue.queued - 1,
         completed: queue.completed + 1
       }, function(err, queue) {
-        return pin.emit('LOG-INFO', {
+        pin.emit('LOG', {
           type: 'INFO',
           msg: 'dequeued item',
           data: queue
         });
+        return cb(err, queue);
       });
     }
   });

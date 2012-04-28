@@ -6,7 +6,8 @@
   "homepage": "http://cloudq.org",
   "main": "server.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "start": "server.js"
   },
   "dependencies": {
     "apprentice": "~0.2.4",
@@ -23,6 +24,7 @@
   },
   "optionalDependencies": {},
   "engines": {
-    "node": "*"
-  }
+    "node": "v0.6.x"
+  },
+  "subdomain": "cloudq"
 }
